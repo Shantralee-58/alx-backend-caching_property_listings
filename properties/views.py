@@ -1,12 +1,18 @@
-# properties/views.py
 from django.views.decorators.cache import cache_page
 from django.http import JsonResponse
-from .models import Property
+from .utils import get_all_properties
 
-@cache_page(60 * 15)  # Cache for 15 minutes
+@cache_page(60 * 15)  # Optional: still cache the response for 15 minutes
 def property_list(request):
-    properties = Property.objects.all().values(
-        'id', 'title', 'description', 'price', 'address'
-    )
-    return JsonResponse({'data': list(properties)})
+    properties = get_all_properties()
+    data = [
+        {
+            'id': prop.id,
+            'title': prop.title,
+            'description': prop.description,
+            'price': prop.price,
+        }
+        for prop in properties
+    ]
+    return JsonResponse({'data': data})
 
