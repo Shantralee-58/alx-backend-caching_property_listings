@@ -10,13 +10,11 @@ def get_all_properties():
     Retrieve all Property objects from Redis cache if available;
     otherwise, fetch from DB and cache for 1 hour.
     """
-    # Try to get the queryset from Redis cache
     properties = cache.get('all_properties')
 
     if properties is None:
         # Cache miss — fetch from database
         properties = Property.objects.all()
-        # Store queryset in cache for 1 hour (3600 seconds)
         cache.set('all_properties', properties, 3600)
         logger.info("Cache miss: fetched properties from DB and cached.")
     else:
@@ -34,11 +32,11 @@ def get_redis_cache_metrics():
     info = redis_conn.info()
     hits = info.get("keyspace_hits", 0)
     misses = info.get("keyspace_misses", 0)
-    total = hits + misses
-    hit_ratio = hits / total if total > 0 else 0.0
+    total_requests = hits + misses
+    hit_ratio = hits / total_requests if total_requests else 0  # hit_ratio calculation
 
-    logger.info(f"Redis Cache Metrics - Hits: {hits}, Misses: {misses}, Hit Ratio: {hit_ratio:.2f}")
-    
+    logger.info(f"Redis Cache Metrics - Hits: {hits}, Misses: {misses}, Hit Ratio: {hit_ratio}")
+
     return {
         "hits": hits,
         "misses": misses,
