@@ -1,7 +1,8 @@
+# properties/urls.py
 from django.urls import path
-from . import views
+from .views import property_list
 
 urlpatterns = [
-    path('', views.property_list, name='property_list'),
+    path('properties/', property_list, name='property-list'),
 ]
 
