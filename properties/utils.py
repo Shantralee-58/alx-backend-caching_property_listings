@@ -25,25 +25,35 @@ def get_all_properties():
 
 def get_redis_cache_metrics():
     """
-    Retrieve Redis cache hit/miss metrics and calculate hit ratio.
-    Returns a dictionary with hits, misses, and hit_ratio.
+    Retrieve Redis cache metrics and calculate hit ratio.
     """
-    redis_conn = get_redis_connection("default")
-    info = redis_conn.info()
-    hits = info.get("keyspace_hits", 0)
-    misses = info.get("keyspace_misses", 0)
-    total_requests = hits + misses
+    try:
+        redis_conn = get_redis_connection("default")
+        info = redis_conn.info()
 
-    # Calculate hit_ratio without using ternary
-    hit_ratio = 0
-    if total_requests:
-        hit_ratio = hits / total_requests
+        hits = info.get("keyspace_hits", 0)
+        misses = info.get("keyspace_misses", 0)
+        total_requests = hits + misses
 
-    logger.info(f"Redis Cache Metrics - Hits: {hits}, Misses: {misses}, Hit Ratio: {hit_ratio}")
+        # Avoid inline ternary
+        if total_requests > 0:
+            hit_ratio = hits / total_requests
+        else:
+            hit_ratio = 0
 
-    return {
-        "hits": hits,
-        "misses": misses,
-        "hit_ratio": hit_ratio
-    }
+        metrics = {
+            "hits": hits,
+            "misses": misses,
+            "hit_ratio": hit_ratio,
+        }
 
+        logger.info(f"Redis cache metrics: {metrics}")
+        return metrics
+
+    except Exception as e:
+        logger.error(f"Error retrieving Redis cache metrics: {e}")
+        return {
+            "hits": 0,
+            "misses": 0,
+            "hit_ratio": 0,
+        }
