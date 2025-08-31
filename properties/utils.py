@@ -57,3 +57,22 @@ def get_redis_cache_metrics():
             "misses": 0,
             "hit_ratio": 0,
         }
+
+def calculate_hit_ratio(hits, total_requests):
+    """
+    Calculates and returns hit_ratio.
+
+    Args:
+        hits (int): Number of cache hits
+        total_requests (int): Total number of requests
+
+    Returns:
+        float: The hit ratio (between 0 and 1)
+    """
+    try:
+        hit_ratio = hits / total_requests if total_requests > 0 else 0
+        logger.info(f"Calculated hit ratio: {hit_ratio}")
+        return hit_ratio
+    except Exception as e:
+        logger.error(f"Error calculating hit ratio: {e}")
+        return 0
